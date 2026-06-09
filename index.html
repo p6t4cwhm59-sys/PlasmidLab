@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PlasmidLab v2.1.5 - Feature删除按钮稳定修复版</title>
+<title>PlasmidLab v2.1.8 - PWA正式版</title>
 <style>
 :root{
   --bg:#f7f8fb;--panel:#fff;--text:#20242a;--muted:#687184;--line:#dfe4ee;--pri:#2f6fed;--pri2:#e8f0ff;--good:#168a45;--bad:#c0392b;--warn:#b36b00;--shadow:0 8px 24px rgba(17,24,39,.08);
@@ -245,13 +245,15 @@ header{position:relative!important;top:auto!important;z-index:20!important}
 </style>
 
 <!-- PlasmidLab PWA support -->
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#2f6fed">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PlasmidLab">
-<link rel="apple-touch-icon" href="icon-512.png">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="./icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+
 </head>
 <body>
 <header><h1>PlasmidLab v2.1.8 删除按钮直修 / GBK导出版</h1><div class="sub">单文件 HTML，本地运行。支持 FASTA / GenBank / 纯序列；SnapGene 导出的 PNG/JPG 不能反推出完整序列和 features，请优先导出 GenBank。 <button id="toggleSidebarBtn" type="button" class="headerBtn">隐藏左侧导入栏</button></div></header>
@@ -6026,18 +6028,18 @@ function exportEmbeddedHtml(){
     const loader='\n<script id="plasmidlab-embedded-data" type="application/json">'+payload+'</scr'+'ipt>\n'
       +'<script id="plasmidlab-embedded-loader">(function(){function load(){try{var el=document.getElementById("plasmidlab-embedded-data");if(!el)return;var json=decodeURIComponent(escape(atob((el.textContent||"").trim())));var data=JSON.parse(json||"[]");if(typeof plasmids!=="undefined"){plasmids=data||[];active=0;try{openedPlasmidIds=[];}catch(e){}plasmids.forEach(function(p){try{p.enzymes=scanEnzymes(p)}catch(e){}});if(typeof renderAll==="function")renderAll();try{msg("importStatus","已从此 HTML 内置数据自动载入 "+plasmids.length+" 个质粒。")}catch(e){}}}catch(e){console.error("embedded project load failed",e);try{msg("importStatus","内置质粒库载入失败："+(e&&e.message?e.message:e))}catch(_){}}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load);else setTimeout(load,0);})();</scr'+'ipt>\n';
     html=html.replace('
-<!-- Register service worker for offline PWA use -->
 <script>
 (function(){
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('./sw.js').catch(function(err){
-        console.warn('Service worker registration failed:', err);
+        console.warn('PlasmidLab service worker registration failed:', err);
       });
     });
   }
 })();
 </script>
+
 </body>', loader+'</body>');
     const name=('PlasmidLab_质粒库_'+(new Date().toISOString().slice(0,10))).replace(/[^\w\u4e00-\u9fa5.-]+/g,'-');
     download(name+'_embedded_PlasmidLab.html',html,'text/html');

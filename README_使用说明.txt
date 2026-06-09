@@ -1,24 +1,22 @@
-PlasmidLab PWA 使用说明
+PlasmidLab PWA 正式版 v2.1.8
 
 文件说明：
-- index.html：PlasmidLab 主程序
-- manifest.json：PWA 安装配置
-- sw.js：离线缓存脚本
-- icon-192.png / icon-512.png：手机桌面图标
+- index.html：PlasmidLab 主程序，已加入 PWA 支持。
+- manifest.json：iPhone/iPad 添加到主屏幕所需配置。
+- sw.js：离线缓存脚本。
+- icon-192.png / icon-512.png：桌面图标。
 
-部署到 GitHub Pages：
-1. 新建 GitHub 仓库，例如 PlasmidLab。
-2. 上传本文件夹内所有文件到仓库根目录。
-3. 打开仓库 Settings → Pages。
-4. Source 选择 Deploy from a branch，Branch 选择 main / root。
-5. 等待生成网址，例如 https://你的用户名.github.io/PlasmidLab/
-
-安装到 iPhone：
-1. 用 Safari 打开上面的网址。
-2. 点击分享按钮。
-3. 选择“添加到主屏幕”。
-4. 桌面会出现 PlasmidLab 图标。
+GitHub Pages 上传步骤：
+1. 解压本 zip。
+2. 进入 GitHub 仓库 PlasmidLab。
+3. 删除旧的 index.html、manifest.json、sw.js、icon-192.png、icon-512.png。
+4. 上传本文件夹内全部文件。
+5. Commit changes。
+6. 等待 GitHub Pages 自动刷新 1-3 分钟。
+7. 打开 https://你的用户名.github.io/PlasmidLab/
+8. iPhone/iPad 点击分享按钮 → 添加到主屏幕 → 保持“作为网页 App 打开”开启 → 添加。
 
 注意：
-- PWA 必须通过 http/https 访问，直接打开本地 file:// 文件不能完整启用离线缓存。
-- 更新新版后，如果手机仍显示旧版，可在 Safari 清除网站数据，或修改 sw.js 里的 CACHE_NAME。
+- PWA 第一次打开需要联网；成功打开一次后，后续可离线缓存运行。
+- 如果更新后页面仍旧显示旧版本，关闭桌面图标重新打开，或在浏览器中刷新几次。
+- GBK 可用 SnapGene 打开，再另存为 .dna。
