@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PlasmidLab v2.1.8 - PWA正式修正版</title>
+<title>PlasmidLab v2.1.9 - PWA UI优化版</title>
 <style>
 :root{
   --bg:#f7f8fb;--panel:#fff;--text:#20242a;--muted:#687184;--line:#dfe4ee;--pri:#2f6fed;--pri2:#e8f0ff;--good:#168a45;--bad:#c0392b;--warn:#b36b00;--shadow:0 8px 24px rgba(17,24,39,.08);
@@ -244,16 +244,16 @@ header{position:relative!important;top:auto!important;z-index:20!important}
 
 </style>
 
-<!-- PlasmidLab PWA metadata -->
+<!-- PlasmidLab PWA metadata v2.1.9 -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2f6fed">
+<meta name="theme-color" content="#244b90">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PlasmidLab">
 <link rel="apple-touch-icon" href="icon-512.png">
 </head>
 <body>
-<header><h1>PlasmidLab v2.1.8 删除按钮直修 / GBK导出版</h1><div class="sub">单文件 HTML，本地运行。支持 FASTA / GenBank / 纯序列；SnapGene 导出的 PNG/JPG 不能反推出完整序列和 features，请优先导出 GenBank。 <button id="toggleSidebarBtn" type="button" class="headerBtn">隐藏左侧导入栏</button></div></header>
+<header><h1>PlasmidLab v2.1.9 PWA UI优化版</h1><div class="sub">单文件 HTML，本地运行。支持 FASTA / GenBank / 纯序列；SnapGene 导出的 PNG/JPG 不能反推出完整序列和 features，请优先导出 GenBank。 <button id="toggleSidebarBtn" type="button" class="headerBtn">隐藏左侧导入栏</button></div></header>
 <div class="app" id="appRoot">
   <button id="sidebarHandle" class="sidebarHandle" type="button">显示导入栏</button>
   <aside id="leftSidebar">
@@ -7739,15 +7739,99 @@ renderAll();
 </script>
 
 
-<script>
-(function(){
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    window.addEventListener('load', function(){
-      navigator.serviceWorker.register('./sw.js').catch(function(err){
-        console.warn('PlasmidLab service worker registration failed:', err);
-      });
-    });
+
+<style id="plasmidlab-v219-pwa-ui-polish-css">
+/* v2.1.9 PWA polish: iPad wide drawer no-overlap, cleaner drawer, sticky search */
+@media (min-width: 1100px){
+  body.plab-folder-open .mainGrid{ margin-left:430px!important; transition:margin-left .18s ease; }
+  body.plab-folder-open #topExportGbBar{ margin-left:430px!important; transition:margin-left .18s ease; }
+  .plasmidFolderMenu.open{
+    position:fixed!important; left:16px!important; top:126px!important; bottom:18px!important;
+    width:405px!important; max-height:none!important; height:auto!important; z-index:210!important;
+    border-radius:16px!important; box-shadow:0 20px 60px rgba(15,23,42,.18)!important;
   }
+  .plasmidFolderList{ max-height:calc(100vh - 205px)!important; }
+}
+.plasmidFolderTop{ position:sticky!important; top:0!important; z-index:3!important; backdrop-filter:blur(8px); }
+.plasmidFolderItem{ min-height:58px; }
+.plasmidFolderItemName{ font-size:14px; }
+.plasmidFolderDelete{ min-width:28px; }
+#plabAutosaveBadge{
+  position:fixed; right:14px; bottom:14px; z-index:350; opacity:0; pointer-events:none;
+  background:rgba(22,138,69,.94); color:#fff; border-radius:999px; padding:7px 11px;
+  font-size:12px; box-shadow:0 10px 28px rgba(0,0,0,.18); transform:translateY(8px);
+  transition:opacity .25s ease, transform .25s ease;
+}
+#plabAutosaveBadge.show{ opacity:1; transform:translateY(0); }
+@media (display-mode: standalone){
+  body{ overscroll-behavior:none; }
+}
+</style>
+
+<script id="plasmidlab-v219-pwa-ui-polish-js">
+(function(){
+  function ready(fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fn); else fn(); }
+  function badge(text){
+    var b=document.getElementById('plabAutosaveBadge');
+    if(!b){ b=document.createElement('div'); b.id='plabAutosaveBadge'; document.body.appendChild(b); }
+    b.textContent=text||'已自动保存'; b.classList.add('show');
+    clearTimeout(b.__t); b.__t=setTimeout(function(){ b.classList.remove('show'); },1300);
+  }
+  function folderOpenState(){
+    var open=!!document.querySelector('.plasmidFolderMenu.open');
+    document.body.classList.toggle('plab-folder-open', open);
+  }
+  function setupFolderObserver(){
+    folderOpenState();
+    var obs=new MutationObserver(folderOpenState);
+    obs.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class'],childList:true});
+    document.addEventListener('click',function(){ setTimeout(folderOpenState,0); },true);
+    window.addEventListener('resize',folderOpenState);
+  }
+  function autoSave(){
+    try{
+      if(typeof plasmids==='undefined') return;
+      localStorage.setItem('PlasmidLab_autosave_v219', JSON.stringify({plasmids:plasmids, active:active, openedPlasmidIds:openedPlasmidIds, t:Date.now()}));
+      localStorage.setItem('PlasmidLab_v1', JSON.stringify(plasmids));
+      window.__plabLastAutosave=Date.now();
+    }catch(e){}
+  }
+  function maybeRestore(){
+    try{
+      if(typeof plasmids==='undefined' || plasmids.length) return;
+      var raw=localStorage.getItem('PlasmidLab_autosave_v219') || localStorage.getItem('PlasmidLab_autosave_v218');
+      if(!raw) return;
+      var obj=JSON.parse(raw);
+      if(obj && Array.isArray(obj.plasmids) && obj.plasmids.length){
+        plasmids=obj.plasmids; active=obj.active||0; openedPlasmidIds=obj.openedPlasmidIds||[];
+        plasmids.forEach(function(p){ try{ p.enzymes=scanEnzymes(p); }catch(e){} });
+        sortPlasmidLibrary(false); renderAll();
+        badge('已恢复上次质粒库');
+      }
+    }catch(e){}
+  }
+  function wrapRenderAll(){
+    try{
+      if(typeof renderAll==='function' && !renderAll.__plabAutosaveWrapped){
+        var old=renderAll;
+        renderAll=function(){ var r=old.apply(this,arguments); setTimeout(autoSave,80); setTimeout(folderOpenState,0); return r; };
+        renderAll.__plabAutosaveWrapped=true;
+      }
+    }catch(e){}
+  }
+  ready(function(){
+    setupFolderObserver();
+    wrapRenderAll();
+    setTimeout(maybeRestore,500);
+    setInterval(autoSave,15000);
+    document.addEventListener('change',function(){ setTimeout(autoSave,200); },true);
+    document.addEventListener('click',function(e){
+      var t=e.target; if(t && t.closest && t.closest('button')) setTimeout(autoSave,500);
+    },true);
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    }
+  });
 })();
 </script>
 </body>

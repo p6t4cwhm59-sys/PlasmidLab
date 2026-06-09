@@ -1,13 +1,12 @@
-PlasmidLab PWA 正式修正版
+PlasmidLab PWA v2.1.9 UI优化版
+
+更新内容：
+1. 修复 iPad 横屏质粒目录浮层穿模：宽屏下打开目录时主界面会自动右移。
+2. 图标升级：更像质粒图谱 App。
+3. 自动保存：编辑、导入、删除后自动保存到浏览器 localStorage；再次打开会尝试恢复。
+4. 离线缓存：首次联网打开后，后续可离线启动。
 
 上传方法：
-1. 解压本 zip。
-2. 在 GitHub 仓库点击 Add file -> Upload files。
-3. 上传解压后的全部文件，覆盖旧文件。
-4. Commit changes。
-5. 等 1-3 分钟后打开 GitHub Pages 地址。
-
-本版修复点：
-- 不再把 JavaScript 代码暴露到页面里。
-- index.html 保留完整 PlasmidLab 主程序。
-- PWA metadata 和 service worker 只插入到真正的 HTML 结尾，不破坏原程序内部字符串。
+把本压缩包解压后的全部文件上传到 GitHub 仓库根目录，覆盖旧文件，Commit changes。
+然后访问：https://p6t4cwhm59-sys.github.io/PlasmidLab/?v=219
+如果仍显示旧界面，请在 iPad 上关闭旧 PWA 后重新添加到主屏幕。
